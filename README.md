@@ -10,15 +10,15 @@ To implement AbstractBST, the implementing class will need to provide concrete i
 
 AbstractBST provides 4 search methods, 4 tree editing methods, and 2 balancing methods to assist sub classes in implementing the abstract methods.
 
-#### `find_node(self, key: int) -> "TreeNode"`
+#### ```py find_node(self, key: int) -> "TreeNode"```
 
-#### `find_new_parent_node(self, key) -> "TreeNode"`
+#### ```py find_new_parent_node(self, key) -> "TreeNode"```
 
-#### `in_order_successor(self, node: "TreeNode") -> "TreeNode"`
+#### ```py in_order_successor(self, node: "TreeNode") -> "TreeNode"```
 
-#### `node_within_subtree(self, lower_node: "TreeNode", upper_node: "TreeNode") -> bool`
+#### ```py node_within_subtree(self, lower_node: "TreeNode", upper_node: "TreeNode") -> bool```
 
-#### `replace_node(self, old_node: "TreeNode", new_node: "TreeNode") -> None`
+#### ```py replace_node(self, old_node: "TreeNode", new_node: "TreeNode") -> None```
 
 Substitutes new_node into the tree in place of old_node. old_node is completely removed from the tree, with new_node taking its place. old_node's parent left subtree, and right subtree all become new_node's. If new_node had children in its old location, the parent of these will be set to None and they will be detached from the tree. It is the responsibility of the caller to manage these now "loose" branches. Raises a TypeError if old_node or new_node is None.
 
