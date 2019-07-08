@@ -127,7 +127,7 @@ AbstractBST implements the MutableSet abstract base class, and so usage of imple
 
 Using the BST class we defined above, here is an example of the usage.
 
-```
+```py
 tree = BST()
 
 keys = [10, 8, 9, 4, 5, 2, 1, 7, 3, 6]
