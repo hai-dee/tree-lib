@@ -28,7 +28,33 @@ AbstractBST provides 4 search methods, 4 tree editing methods, and 2 balancing m
 
 #### rotate_left(self, node_to_rotate: "TreeNode") -> None
 
+Takes a node that has a right child, and modifies the tree such
+that the node is now the left child of its original right child, and
+then moves other branches so that the tree remains valid.
+
+This method is intended for use by self-balancing implementations.
+
+Args:
+  node_to_rotate: a node with a right child.
+
+Raises:
+  TypeError: node_to_rotate is None
+  ValueError: node_to_rotate has no right child.
+
 #### rotate_right(self, node_to_rotate: "TreeNode") -> None
+
+Takes a node that has a left child, and modifies the tree such
+that the node is now the right child of its original left child, and
+then moves other branches so that the tree remains valid.
+
+This method is intended for use by self-balancing implementations.
+
+Args:
+  node_to_rotate: a node with a left child.
+
+Raises:
+  TypeError: node_to_rotate is None.
+  ValueError: node_to_rotate has no left child.
 
 ### Example
 
