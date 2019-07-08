@@ -22,11 +22,11 @@ AbstractBST provides 4 search methods, 4 tree editing methods, and 2 balancing m
 
 Substitutes new_node into the tree in place of old_node. old_node is completely removed from the tree, with new_node taking its place. old_node's parent left subtree, and right subtree all become new_node's. If new_node had children in its old location, the parent of these will be set to None and they will be detached from the tree. It is the responsibility of the caller to manage these now "loose" branches. Raises a TypeError if old_node or new_node is None.
 
-#### `replace_subtree(self, old_subtree: "TreeNode", new_subtree: "TreeNode") -> None`
+#### `py|replace_subtree(self, old_subtree: "TreeNode", new_subtree: "TreeNode") -> None`
 
 Replaces old_subtree with new_subtree. old_subtree's parent will instead link to new_subtree and if old_subtree was the tree root, new_subtree will become the tree root. If new_subtree is already elsewhere in the BST, it will be removed from the old location. old_subtree's parent link will also be severed. Raises a TypeError if old_subtree is None or a ValueError if old_subtree is within new_subtree.
 
-#### r`replace_right_subtree(self, parent: "TreeNode", new_subtree: "TreeNode") -> None`
+#### `py replace_right_subtree(self, parent: "TreeNode", new_subtree: "TreeNode") -> None`
 
 #### `replace_left_subtree(self, parent: "TreeNode", new_subtree: "TreeNode") -> None`
 
