@@ -93,32 +93,32 @@ class BST(AbstractBST):
         return new_node
         
    def _discard(self, key):
-   # Find the target node in the tree. If the node does not exist,
-   # AbstractBST will throw a KeyError, as per the MutableSet.discard
-   # specifications. This is taken care of for you, so your code can
-   # just assume find_node will return a valid node.
-   target_node = self.find_node(key)
+        # Find the target node in the tree. If the node does not exist,
+        # AbstractBST will throw a KeyError, as per the MutableSet.discard
+        # specifications. This is taken care of for you, so your code can
+        # just assume find_node will return a valid node.
+        target_node = self.find_node(key)
 
-   # There is, at most, a right child. Use AbstractBST.replace_subtree to
-   # replace the node we want to delete with its right subtree.
-   if target_node.left is None:
-       self.replace_subtree(target_node, target_node.right)
-       return
+        # There is, at most, a right child. Use AbstractBST.replace_subtree to
+        # replace the node we want to delete with its right subtree.
+        if target_node.left is None:
+            self.replace_subtree(target_node, target_node.right)
+            return
 
-   # There is only a left child.
-   if target_node.right is None:
-       self.replace_subtree(target_node, target_node.left)
-       return
+        # There is only a left child.
+        if target_node.right is None:
+            self.replace_subtree(target_node, target_node.left)
+            return
 
-   # There are 2 children. Use the text book strategy of finding the
-   # inorder successor (using AbstractBST.in_order_successor) so that we
-   # can replace it with it, and then use AbstractBST.replace_subtree,
-   # to replace the inorder successor with its right child, and 
-   # AbstractBST.replace_node to replace the target node with the 
-   # successor.
-   successor = self.in_order_successor(target_node)
-   self.replace_subtree(successor, successor.right)
-   self.replace_node(target_node, successor)
+        # There are 2 children. Use the text book strategy of finding the
+        # inorder successor (using AbstractBST.in_order_successor) so that we
+        # can replace it with it, and then use AbstractBST.replace_subtree,
+        # to replace the inorder successor with its right child, and 
+        # AbstractBST.replace_node to replace the target node with the 
+        # successor.
+        successor = self.in_order_successor(target_node)
+        self.replace_subtree(successor, successor.right)
+        self.replace_node(target_node, successor)
 ```
 
 ### Using AbstractBST implementations
