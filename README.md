@@ -10,81 +10,35 @@ To implement AbstractBST, the implementing class will need to provide concrete i
 
 AbstractBST provides 4 search methods, 4 tree editing methods, and 2 balancing methods to assist sub classes in implementing the abstract methods.
 
-#### find_node(self, key: int) -> "TreeNode"
+#### `find_node(self, key: int) -> "TreeNode"`
 
-#### find_new_parent_node(self, key) -> "TreeNode"
+#### `find_new_parent_node(self, key) -> "TreeNode"`
 
-#### in_order_successor(self, node: "TreeNode") -> "TreeNode"
+#### `in_order_successor(self, node: "TreeNode") -> "TreeNode"`
 
-#### node_within_subtree(self, lower_node: "TreeNode", upper_node: "TreeNode") -> bool
+#### `node_within_subtree(self, lower_node: "TreeNode", upper_node: "TreeNode") -> bool`
 
-#### replace_node(self, old_node: "TreeNode", new_node: "TreeNode") -> None
+#### `replace_node(self, old_node: "TreeNode", new_node: "TreeNode") -> None`
 
-Substitutes new_node into the tree in place of old_node.
+Substitutes new_node into the tree in place of old_node. old_node is completely removed from the tree, with new_node taking its place. old_node's parent left subtree, and right subtree all become new_node's. If new_node had children in its old location, the parent of these will be set to None and they will be detached from the tree. It is the responsibility of the caller to manage these now "loose" branches. Raises a TypeError if old_node or new_node is None.
 
-        old_node is completely removed from the tree, with new_node taking its 
-        place. old_node's parent left subtree, and right subtree all become 
-        new_node's. If new_node had children in its old location, the parent 
-        of these will be set to None and they will be detached from the tree. 
-        It is the responsibility of the caller to manage these now "loose" 
-        branches.
+#### `replace_subtree(self, old_subtree: "TreeNode", new_subtree: "TreeNode") -> None`
 
-        Args:
-            old_node: The node to be replaced.
-            new_node: The replacement node.
+Replaces old_subtree with new_subtree. old_subtree's parent will instead link to new_subtree and if old_subtree was the tree root, new_subtree will become the tree root. If new_subtree is already elsewhere in the BST, it will be removed from the old location. old_subtree's parent link will also be severed. Raises a TypeError if old_subtree is None or a ValueError if old_subtree is within new_subtree.
 
-        Raises:
-            TypeError: old_node or new_node is None.
+#### r`replace_right_subtree(self, parent: "TreeNode", new_subtree: "TreeNode") -> None`
 
-#### replace_subtree(self, old_subtree: "TreeNode", new_subtree: "TreeNode") -> None
+#### `replace_left_subtree(self, parent: "TreeNode", new_subtree: "TreeNode") -> None`
 
-Replaces old_subtree with new_subtree. old_subtree's parent will
-instead link to new_subtree and if old_subtree was the tree root,
-new_subtree will become the tree root. If new_subtree is already
-elsewhere in the BST, it will be removed from the old location.
-old_subtree's parent link will also be severed.
+#### `rotate_left(self, node_to_rotate: "TreeNode") -> None`
 
-Args:
-old_subtree: The subtree to be replaced.
-new_subtree: The replacement subtree.
+Takes a node that has a right child, and modifies the tree such that the node is now the left child of its original right child, and
+then moves other branches so that the tree remains valid. This method is intended for use by self-balancing implementations. Raises a TypeError if node_to_rotate is None or a ValueError if node_to_rotate has no right child.
 
-Raises:
-TypeError: old_subtree is None.
-ValueError: old_subtree is within new_subtree.
+#### `rotate_right(self, node_to_rotate: "TreeNode") -> None`
 
-#### replace_right_subtree(self, parent: "TreeNode", new_subtree: "TreeNode") -> None
-
-#### replace_left_subtree(self, parent: "TreeNode", new_subtree: "TreeNode") -> None
-
-#### rotate_left(self, node_to_rotate: "TreeNode") -> None
-
-Takes a node that has a right child, and modifies the tree such
-that the node is now the left child of its original right child, and
-then moves other branches so that the tree remains valid.
-
-This method is intended for use by self-balancing implementations.
-
-Args:
-  node_to_rotate: a node with a right child.
-
-Raises:
-  TypeError: node_to_rotate is None
-  ValueError: node_to_rotate has no right child.
-
-#### rotate_right(self, node_to_rotate: "TreeNode") -> None
-
-Takes a node that has a left child, and modifies the tree such
-that the node is now the right child of its original left child, and
-then moves other branches so that the tree remains valid.
-
-This method is intended for use by self-balancing implementations.
-
-Args:
-  node_to_rotate: a node with a left child.
-
-Raises:
-  TypeError: node_to_rotate is None.
-  ValueError: node_to_rotate has no left child.
+Takes a node that has a left child, and modifies the tree such that the node is now the right child of its original left child, and
+then moves other branches so that the tree remains valid. This method is intended for use by self-balancing implementations. Raises a TypeError if node_to_rotate is None or a ValueError if node_to_rotate has no left child.
 
 ### Example
 
