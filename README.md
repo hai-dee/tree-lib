@@ -4,13 +4,37 @@ Tree-lib provides 2 classes: AbstractBST and RedBlackTree. AbstractBST is an abs
 
 ## AbstractBST
 
-To implement AbstractBST, the implementing class will need to provide concrete implementations for the ```_add``` and ```_remove``` functions. The root node will need to be attached to ```self.root```, and the add and remove functions will need to maintain the binary search tree property (https://en.wikipedia.org/wiki/Binary_search_tree#Definition) so that the contains and in-order traversal methods provided by AbstractBST work correctly. 
+To implement AbstractBST, the implementing class will need to provide concrete implementations for the ```_add``` and ```_remove``` abstract methods. The root node will need to be attached to ```self.root```, and the add and remove functions will need to maintain the binary search tree property (https://en.wikipedia.org/wiki/Binary_search_tree#Definition) so that the contains and in-order traversal methods provided by AbstractBST work correctly. 
+
+### Helper methods for subclasses
+
+AbstractBST provides 4 search methods, 4 tree editing methods, and 2 balancing methods to assist sub classes in implementing the abstract methods.
+
+#### find_node(self, key: int) -> "TreeNode"
+
+#### find_new_parent_node(self, key) -> "TreeNode"
+
+#### in_order_successor(self, node: "TreeNode") -> "TreeNode"
+
+#### node_within_subtree(self, lower_node: "TreeNode", upper_node: "TreeNode") -> bool
+
+#### replace_node(self, old_node: "TreeNode", new_node: "TreeNode") -> None
+
+#### replace_subtree(self, old_subtree: "TreeNode", new_subtree: "TreeNode") -> None
+
+#### replace_right_subtree(self, parent: "TreeNode", new_subtree: "TreeNode") -> None
+
+#### replace_left_subtree(self, parent: "TreeNode", new_subtree: "TreeNode") -> None
+
+#### rotate_left(self, node_to_rotate: "TreeNode") -> None
+
+#### rotate_right(self, node_to_rotate: "TreeNode") -> None
 
 ### Example
 
-Here is an example of using AbstractBST to implement a BST using the basic textbook add and remove functions.
+Here is an example of using AbstractBST to implement a BST using the bread and butter textbook add and remove strategies.
 
-```
+```py
 from abstract_tree import AbstractBST
 
 class BST(AbstractBST):
@@ -41,6 +65,34 @@ class BST(AbstractBST):
 
         # Return the new node.
         return new_node
+        
+   def _discard(self, key):
+   # Find the target node in the tree. If the node does not exist,
+   # AbstractBST will throw a KeyError, as per the MutableSet.discard
+   # specifications. This is taken care of for you, so your code can
+   # just assume find_node will return a valid node.
+   target_node = self.find_node(key)
+
+   # There is, at most, a right child. Use AbstractBST.replace_subtree to
+   # replace the node we want to delete with its right subtree.
+   if target_node.left is None:
+       self.replace_subtree(target_node, target_node.right)
+       return
+
+   # There is only a left child.
+   if target_node.right is None:
+       self.replace_subtree(target_node, target_node.left)
+       return
+
+   # There are 2 children. Use the text book strategy of finding the
+   # inorder successor (using AbstractBST.in_order_successor) so that we
+   # can replace it with it, and then use AbstractBST.replace_subtree,
+   # to replace the inorder successor with its right child, and 
+   # AbstractBST.replace_node to replace the target node with the 
+   # successor.
+   successor = self.in_order_successor(target_node)
+   self.replace_subtree(successor, successor.right)
+   self.replace_node(target_node, successor)
 ```
 
 
