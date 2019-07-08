@@ -10,9 +10,9 @@ To implement AbstractBST, the implementing class will need to provide concrete i
 
 AbstractBST provides 4 search methods, 4 tree editing methods, and 2 balancing methods to assist sub classes in implementing the abstract methods.
 
-#### ```py find_node(self, key: int) -> "TreeNode"```
+#### ```find_node(self, key: int) -> "TreeNode"```
 
-#### ```py find_new_parent_node(self, key) -> "TreeNode"```
+#### ```py|find_new_parent_node(self, key) -> "TreeNode"```
 
 #### ```py in_order_successor(self, node: "TreeNode") -> "TreeNode"```
 
