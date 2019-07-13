@@ -1,6 +1,6 @@
 # tree-lib
 
-Tree-lib provides 2 classes: AbstractBST and RedBlackTree. AbstractBST is an abstract base class providing helper methods for binary search tree implementations, and RedBlackTree is an implementation of a balanced binary search tree.
+Tree-lib provides 2 classes: AbstractBST and RedBlackTree. AbstractBST is an abstract base class providing helper methods for binary search tree implementations, and RedBlackTree is an implementation of a balanced binary search tree. Tests covering both classes are also provided.
 
 ## AbstractBST
 
@@ -154,7 +154,64 @@ for key in keys:
     assert(key not in tree)
 ```
 
-
-
 ## RedBlackTree
 
+```RedBlackTree``` is a balanced-tree implementation of a binary search tree. Balance is maintained by ensuring the tree always maintains the following properties.
+
+1) All leaf nodes are implicit NIL's.
+2) All nodes are assigned a color property, and can be red or black.
+3) The root is black.
+4) All leaf nodes (the implicit NIL's) are black.
+5) If a node is red, then it cannot have red children.
+6) For every path from a node to the NIL's below it, the number of black nodes is the same.
+
+When an add or a remove is carried out, the tree rearranges and repaints nodes in O(log(n)) time to maintain these properties. The properties guarantee that the maximum depths of the left and right subtree of a node can never be more than twice each other (in the worst case, one subtree would have no red nodes, and the other would have red nodes at every possible valid place).
+
+Red-Black trees guarantee worst case O(log(n)) insertion, lookup, and removal. This is unlike naïve binary search tree implementations, which have a worst case of O(n) if the tree becomes unbalanced.
+
+```RedBlackTree``` is a good set implementation to use where you require the ability to iterate the set in sorted order. Where sorted order does not matter though, use the build in hash set (simply "set") instead.
+
+For more information on how Red-Black Trees work, check Wikipedia (https://en.wikipedia.org/wiki/Red%E2%80%93black_tree), or ideally the CLRS Algorithms books (https://en.wikipedia.org/wiki/Introduction_to_Algorithms). The implementation of ```RedBlackTree``` closely follows the add algorithm provided in the book, although I chose to design and structure the remove algorithm myself, and so it differs somewhat.
+
+### Usage of ```RedBlackTree```
+
+Usage of RedBlackTree is the same as the example above.
+
+```py
+import tree
+
+tree = tree.RedBlackTree()
+
+keys = [10, 8, 9, 4, 5, 2, 1, 7, 3, 6]
+
+# Add the keys
+for key in keys:
+    tree.add(key)
+    # Ensure the key is now in the tree.
+    assert(key in tree)
+
+# Use the iterator to return the keys in order
+# Will print: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+print(list(tree))
+
+# Check the length of the tree.
+# Will print: 10
+print(len(tree))
+
+# Remove the keys
+for key in keys:
+    assert(key in tree)
+    tree.remove(key)
+    # Ensure the key has now been deleted.
+    assert(key not in tree)
+```
+
+## Tests
+
+To run the tests, simply navigate to the directory and run: ```py test.py```. 
+
+```RedBlackTree``` has blackbox tests for its interface and additionally some implementation tests to ensure the tree balance is within the expected range (one subtree of a node cannot have a maximum depth of more than twice the other subtree) and that the red-black properties seem to be valid.
+
+These tests can easily be adapted to test other ```AbstractBST``` or ```MutableSet``` implementations.
+
+```AbstractBST``` is tested by using a dummy concrete class that constructs a tree from an adjacency list, allowing the testing of the implemented functions without the need for add or remove implementations.
