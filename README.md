@@ -2,7 +2,7 @@
 
 Tree-lib provides 2 classes: ```AbstractBST``` and ```RedBlackTree```. ```AbstractBST``` is an abstract base class providing helper methods for binary search tree implementations, and ```RedBlackTree``` is an implementation of a balanced binary search tree. Tests covering both classes are also provided.
 
-## AbstractBST
+## ```AbstractBST```
 
 To implement ```AbstractBST```, the implementing class will need to provide concrete implementations for the ```_add``` and ```_remove``` abstract methods. The root node will need to be attached to ```self.root```, and the add and remove functions will need to maintain the binary search tree property (https://en.wikipedia.org/wiki/Binary_search_tree#Definition) so that the contains and in-order traversal methods provided by ```AbstractBST``` work correctly. 
 
@@ -121,7 +121,7 @@ class BST(AbstractBST):
         self.replace_node(target_node, successor)
 ```
 
-### Using AbstractBST implementations
+### Using ```AbstractBST``` implementations
 
 ```AbstractBST``` implements the ```MutableSet``` abstract base class, and so usage of implementations of ```AbstractBST``` is the same as the built in python `set`. There are pros and cons to using a Tree implementation of a set, as opposed to the built in hash set. The main advantage is that the **keys are maintained in a sorted order**, allowing them to be returned in sorted order in O(n) time. On the downside, the standard operations of add, contains, and remove are O(log(n)), as opposed to the O(1) achieved by a hash set. An unbalanced tree implementation (like the BST example above) could even take O(n) time on these basic operations. Balanced trees, such as Red-Black Trees ensure the operations are always O(log(n)).
 
@@ -154,7 +154,7 @@ for key in keys:
     assert(key not in tree)
 ```
 
-## RedBlackTree
+## ```RedBlackTree```
 
 ```RedBlackTree``` is a balanced-tree implementation of a binary search tree. Balance is maintained by ensuring the tree always maintains the following properties.
 
