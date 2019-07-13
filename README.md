@@ -1,14 +1,14 @@
 # tree-lib
 
-Tree-lib provides 2 classes: AbstractBST and RedBlackTree. AbstractBST is an abstract base class providing helper methods for binary search tree implementations, and RedBlackTree is an implementation of a balanced binary search tree. Tests covering both classes are also provided.
+Tree-lib provides 2 classes: ```AbstractBST``` and ```RedBlackTree```. ```AbstractBST``` is an abstract base class providing helper methods for binary search tree implementations, and ```RedBlackTree``` is an implementation of a balanced binary search tree. Tests covering both classes are also provided.
 
 ## AbstractBST
 
-To implement AbstractBST, the implementing class will need to provide concrete implementations for the ```_add``` and ```_remove``` abstract methods. The root node will need to be attached to ```self.root```, and the add and remove functions will need to maintain the binary search tree property (https://en.wikipedia.org/wiki/Binary_search_tree#Definition) so that the contains and in-order traversal methods provided by AbstractBST work correctly. 
+To implement ```AbstractBST```, the implementing class will need to provide concrete implementations for the ```_add``` and ```_remove``` abstract methods. The root node will need to be attached to ```self.root```, and the add and remove functions will need to maintain the binary search tree property (https://en.wikipedia.org/wiki/Binary_search_tree#Definition) so that the contains and in-order traversal methods provided by ```AbstractBST``` work correctly. 
 
 ### Helper methods for subclasses
 
-In addition to implementing the [MutableSet abc](https://docs.python.org/3.6/library/collections.abc.html#collections.abc.MutableSet), AbstractBST provides 4 search methods, 4 tree editing methods, and 2 balancing methods to assist sub classes in implementing the abstract methods.
+In addition to implementing the [MutableSet abc](https://docs.python.org/3.6/library/collections.abc.html#collections.abc.MutableSet), ```AbstractBST``` provides 4 search methods, 4 tree editing methods, and 2 balancing methods to assist sub classes in implementing the abstract methods.
 
 #### `find_node(self, key: int) -> "TreeNode"`
 
@@ -58,7 +58,7 @@ then moves other branches so that the tree remains valid. This method is intende
 
 ### Example
 
-Here is an example of using AbstractBST to implement a BST using the bread and butter textbook add and remove strategies.
+Here is an example of using ```AbstractBST``` to implement a binary search tree using the bread and butter textbook add and remove strategies.
 
 ```py
 from abstract_tree import AbstractBST
@@ -123,7 +123,7 @@ class BST(AbstractBST):
 
 ### Using AbstractBST implementations
 
-AbstractBST implements the MutableSet abstract base class, and so usage of implementations of AbstractBST is the same as the built in python `set`. There are pros and cons to using a Tree implementation of a set, as opposed to the built in hash set. The main advantage is that the **keys are maintained in a sorted order**, allowing them to be returned in sorted order in O(n) time. On the downside, the standard operations of add, contains, and remove are O(log(n)), as opposed to the O(1) achieved by a hash set. An unbalanced tree implementation (like the BST example above) could even take O(n) time on these basic operations. Balanced trees, such as Red-Black Trees ensure the operations are always O(log(n)).
+```AbstractBST``` implements the ```MutableSet``` abstract base class, and so usage of implementations of ```AbstractBST``` is the same as the built in python `set`. There are pros and cons to using a Tree implementation of a set, as opposed to the built in hash set. The main advantage is that the **keys are maintained in a sorted order**, allowing them to be returned in sorted order in O(n) time. On the downside, the standard operations of add, contains, and remove are O(log(n)), as opposed to the O(1) achieved by a hash set. An unbalanced tree implementation (like the BST example above) could even take O(n) time on these basic operations. Balanced trees, such as Red-Black Trees ensure the operations are always O(log(n)).
 
 Using the BST class we defined above, here is an example of the usage.
 
