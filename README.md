@@ -208,7 +208,9 @@ for key in keys:
 
 ## Tests
 
-To run the tests, simply navigate to the directory and run: ```py test.py```. 
+To run the tests, simply navigate to the directory and run: 
+
+```py test.py```. 
 
 ```RedBlackTree``` has blackbox tests for its interface and additionally some implementation tests to ensure the tree balance is within the expected range (one subtree of a node cannot have a maximum depth of more than twice the other subtree) and that the red-black properties seem to be valid.
 
