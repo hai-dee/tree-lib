@@ -10,7 +10,7 @@ class AbstractBST(ABC, collections.abc.MutableSet):
     """
 
 
-    class TreeNode(object):
+    class TreeNode:
         """A TreeNode represents a single Node in a Binary Search Tree.
 
         Attributes:
@@ -63,10 +63,9 @@ class AbstractBST(ABC, collections.abc.MutableSet):
             """
             if self.left is None and self.right is None:
                 return 0
-            elif self.left is not None and self.right is not None:
+            if self.left is not None and self.right is not None:
                 return 2
-            else:
-                return 1
+            return 1
 
 
         def has_left_child_only(self) -> bool:
@@ -92,8 +91,7 @@ class AbstractBST(ABC, collections.abc.MutableSet):
             """
             if self.is_left_of_parent:
                 return self.parent.right
-            else: # This case will also return None if the sibling doesn't exist.
-                return self.parent.left
+            return self.parent.left
 
 
     def __init__(self):
@@ -127,7 +125,6 @@ class AbstractBST(ABC, collections.abc.MutableSet):
             The new TreeNode, or None if there was already a TreeNode present
             with the key.
         """
-        pass
 
 
     @_increment_after
@@ -147,7 +144,6 @@ class AbstractBST(ABC, collections.abc.MutableSet):
             A boolean specifying whether or not the key was actually in the
             tree. True if it was, and False if not.
         """
-        pass
 
 
     @_decrement_after
@@ -258,11 +254,10 @@ class AbstractBST(ABC, collections.abc.MutableSet):
 
         # Otherwise, the in-order successor, if it exists, will be the the
         # parent of the first ancestor who is a left child.
-        else:
-            current_node = node
-            while current_node.parent is not None and current_node.is_right_of_parent:
-                current_node = current_node.parent
-            return current_node.parent
+        current_node = node
+        while current_node.parent is not None and current_node.is_right_of_parent:
+            current_node = current_node.parent
+        return current_node.parent
 
 
     def node_within_subtree(self, lower_node: "TreeNode", upper_node: "TreeNode") -> bool:

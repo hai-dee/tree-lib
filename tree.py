@@ -1,6 +1,4 @@
-from abc import ABC, abstractmethod
 from abstract_tree import AbstractBST
-import collections.abc
 
 class RedBlackTree(AbstractBST):
 
@@ -72,8 +70,7 @@ class RedBlackTree(AbstractBST):
             if self.parent is not None:
                 if self.is_left_of_parent:
                     return self.parent.right
-                else:
-                    return self.parent.left
+                return self.parent.left
             return None
 
         @property
@@ -86,34 +83,36 @@ class RedBlackTree(AbstractBST):
             if self.parent is not None and self.parent.parent is not None:
                 if self.parent.is_left_of_parent:
                     return self.parent.parent.right
-                else:
-                    return self.parent.parent.left
+                return self.parent.parent.left
             return None
 
-
-        #Returns the black depth if its valid, otherwise returns -1
         def DEBUG_valid_black_depth(self):
-            if self.left == None and self.right == None:
+            """Returns the black depth if its valid, otherwise returns -1"""
+            if self.left is None and self.right is None:
                 if self.is_red:
                     return 1
-                else:
-                    return 2
-            elif self.left == None:
-                assert(self.is_black and self.right.is_red and (not self.right.left) and (not self.right.right))
                 return 2
-            elif self.right == None:
-                assert(self.is_black and self.left.is_red and (not self.left.left) and (not self.left.right))
+            if self.left is None:
+                assert self.is_black \
+                    and self.right.is_red \
+                    and (not self.right.left) \
+                    and (not self.right.right)
                 return 2
-            else:
-                node_weight = 0 if self.is_red else 1
-                left_weight = self.left.DEBUG_valid_black_depth()
-                right_weight = self.right.DEBUG_valid_black_depth()
-                assert(left_weight == right_weight)
-                return node_weight + left_weight
+            if self.right is None:
+                assert self.is_black \
+                    and self.left.is_red \
+                    and (not self.left.left) \
+                    and (not self.left.right)
+                return 2
+            node_weight = 0 if self.is_red else 1
+            left_weight = self.left.DEBUG_valid_black_depth()
+            right_weight = self.right.DEBUG_valid_black_depth()
+            assert left_weight == right_weight
+            return node_weight + left_weight
 
 
         def DEBUG_valid_red_nodes(self):
-            if self.left == None and self.right == None:
+            if self.left is None and self.right is None:
                 return True
             if self.is_red:
                 if self.left and self.left.is_red:
@@ -129,24 +128,26 @@ class RedBlackTree(AbstractBST):
         """Implements abstract_tree._add"""
         try:
             parent_node = self.find_new_parent_node(key)
-        except(KeyError): # This happens if the node was already in the tree.
-            return
+        except KeyError: # This happens if the node was already in the tree.
+            return None
 
         def restore_red_black_property(node):
-            # Refactor this line
-            while node.parent is not None and node.parent.is_red and node.aunt is not None and node.aunt.is_red:
+
+            while node.parent is not None \
+                    and node.parent.is_red \
+                    and node.aunt is not None \
+                    and node.aunt.is_red:
                 node = node.parent.parent
                 node.paint_red()
                 node.left.paint_black()
                 node.right.paint_black()
 
             if node.parent is not None and node.parent.is_red:
-                #Firstly, check if we are in the "bent" case. If so, "straighten" the branch.
-
+                # Firstly, check for the 2 "bent" cases.
+                # If so, "straighten" the branch.
                 if node.is_left_of_parent and node.parent.is_right_of_parent:
                     node = node.parent
                     self.rotate_right(node)
-
                 elif node.is_right_of_parent and node.parent.is_left_of_parent:
                     node = node.parent
                     self.rotate_left(node)
@@ -194,8 +195,8 @@ class RedBlackTree(AbstractBST):
         # because its parent will now have more weight on the other side. The
         # strategy used here to address the imbalance is to traverse up the
         # ancestory of the leaf node, converting the sibling to red at each step
-        # so that the 2 branches of the parent are the same weight and the imbalance
-        # is now at the grandparent node.
+        # so that the 2 branches of the parent are the same weight and the
+        # imbalance  is now at the grandparent node.
         # If at the current step there is already a red sibling, red parent, or
         # red niece (child of sibling), changing the sibling to red would
         # either violate the Red-Black property of the tree or be ineffective.
@@ -211,23 +212,24 @@ class RedBlackTree(AbstractBST):
             # do not have a red relative that can be used for balancing the
             # entire tree.
             current_node = node_to_remove
-            while ( current_node != self.root and
-                    current_node.parent.is_black and
-                    current_node.sibling.is_black and
-                    current_node.sibling.left_is_black and
-                    current_node.sibling.right_is_black):
+            while current_node != self.root \
+                    and current_node.parent.is_black \
+                    and current_node.sibling.is_black \
+                    and current_node.sibling.left_is_black \
+                    and current_node.sibling.right_is_black:
                 current_node.sibling.paint_red()
                 current_node = current_node.parent
 
             if current_node != self.root:
 
-                # If the sibling is red, transform into a red-parent case and then
-                # proceed to the niece and parent cases below.
+                # If the sibling is red, transform into a red-parent case
+                # and then proceed to the niece and parent cases below.
                 if current_node.sibling.is_red:
                     transform_red_sibling_to_red_parent(current_node)
 
                 # If there are any red nieces, we'll need to rotate them up.
-                if current_node.sibling.left_is_red or current_node.sibling.right_is_red:
+                if current_node.sibling.left_is_red \
+                        or current_node.sibling.right_is_red:
                     rotate_red_niece(current_node)
                 # Otherwise the only red node is the red parent, which we can use for
                 # recoloring the tree how we need it.
@@ -314,7 +316,8 @@ class RedBlackTree(AbstractBST):
                 return 0
             if sub_root.left is None and sub_root.right is None:
                 return 1
-            return 1 + max(recursive_helper(sub_root.left), recursive_helper(sub_root.right))
+            return 1 + max(recursive_helper(sub_root.left),
+                           recursive_helper(sub_root.right))
 
         return recursive_helper(self.root)
 
@@ -323,27 +326,27 @@ class RedBlackTree(AbstractBST):
         """Returns True iff this is a valid RedBlackTree, False otherwise."""
 
         def tree_depth():
-            if self.root:
+            if self.root is not None:
                 return self.root.DEBUG_valid_black_depth()
-            else:
-                return False
+            return False
 
         def valid_red_nodes():
-            if self.root:
+            if self.root is not None:
                 return self.root.DEBUG_valid_red_nodes()
-            else:
-                return True
+            return True
 
         if self.root is not None and self.root.is_red:
-            print("The tree is not a RB Tree because the root is currently red.")
+            print("The tree is not a RB Tree because the root is currently "
+                  "red.")
             return False
 
         if not tree_depth():
-            print("The tree is not a RB Tree because the number of black nodes on each root to leaf path are not identical.")
+            print("The tree is not a RB Tree because the number of black "
+                  "nodes on each root to leaf path are not identical.")
             return False
 
         if not valid_red_nodes():
-            print("The tree is not a RB Tree because there are red nodes with red children.")
+            print("The tree is not a RB Tree because there are red nodes "
+                  "with red children.")
             return False
-
         return True

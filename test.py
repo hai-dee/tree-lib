@@ -1,13 +1,14 @@
+from random import shuffle
+from math import log
+import unittest
+
 from abstract_tree import AbstractBST
 from tree import RedBlackTree
-import unittest
-from random import shuffle
-from random import randint
-from math import log
 
 class ConcreteTestTree(AbstractBST):
 
-    """A concrete implementation of AbstractBST that can be used for testing."""
+    """A concrete implementation of AbstractBST that can be used for
+       testing."""
 
     def __init__(self, root):
         self.root = root
@@ -28,35 +29,38 @@ class ConcreteTestTree(AbstractBST):
 
 class BinaryTreeSnapshot(object):
 
-    """An immutable snapshot of a binary subtree that is used for testing whether
-    or not a tree changed in unexpected ways after a method call."""
+    """An immutable snapshot of a binary subtree that is used for
+       testing whether or not a tree changed in unexpected ways after
+       a method call."""
 
     def __init__(self, component_roots=set(), ignore_branches=set()):
         self._links = {"parent": {}, "left": {}, "right": {}}
         for component_root in component_roots:
-            for node in self.__node_generator_with_pruning(component_root, ignore_branches):
-                self._links["left"][node.key] = node.left.key if node.left else None
-                self._links["right"][node.key] = node.right.key if node.right else None
-                self._links["parent"][node.key] = node.parent.key if node.parent else None
+            for node in self._node_generator(component_root, ignore_branches):
+                self._links["left"][node.key] = \
+                    node.left.key if node.left else None
+                self._links["right"][node.key] = \
+                    node.right.key if node.right else None
+                self._links["parent"][node.key] = \
+                    node.parent.key if node.parent else None
 
-    def __node_generator_with_pruning(self, subroot, prune_branches):
+    def _node_generator(self, subroot, prune_branches):
         if subroot is not None and subroot not in prune_branches:
             yield subroot
-            yield from self.__node_generator_with_pruning(subroot.left, prune_branches)
-            yield from self.__node_generator_with_pruning(subroot.right, prune_branches)
+            yield from self._node_generator(subroot.left, prune_branches)
+            yield from self._node_generator(subroot.right, prune_branches)
 
     def __eq__(self, other):
         return self._links == other._links
 
-    # TODO Tidy up the code in this function.
     def difference(self, other, ignore_overwrites=False):
         """Returns a description of how self differs from other and vice versa.
 
         Args:
             other: A BinaryTreeSnapshot
-            ignore_overwrites: A boolean stating whether or not to ignore differences
-                 in self of the form (p, x, y), where there was a difference in other
-                 of the form (p, x, z).
+            ignore_overwrites: A boolean stating whether or not to ignore
+                differences in self of the form (p, x, y), where there was
+                a difference in other of the form (p, x, z).
 
         Returns:
             2 lists of differences, one of differences that are present in self,
@@ -83,7 +87,8 @@ class BinaryTreeSnapshot(object):
         differences = []
         for link_type, links in self._links.items():
             for key, value in links.items():
-                if key not in other._links[link_type] or other._links[link_type][key] != value:
+                if key not in other._links[link_type] \
+                        or other._links[link_type][key] != value:
                     differences.append((link_type, key, value))
         return differences
 
@@ -156,7 +161,7 @@ def make_sample_tree():
             node_set[right_key].parent = node_set[key]
             node_set[key].right = node_set[right_key]
 
-    tree =  ConcreteTestTree(node_set[100])
+    tree = ConcreteTestTree(node_set[100])
     tree.set_number_of_nodes(len(nodes_to_use))
 
     return tree
@@ -164,84 +169,83 @@ def make_sample_tree():
 
 class TestAbstractBSTReadOnlyMethods(unittest.TestCase):
 
-    """This class provides unit tests for the following read only methods of AbstactBST
-    1) __iter__
-    2) node_within_subtree
-    3) find_node
-    4) find_new_parent_node
-    5) in_order_successor
-    6) __non_zero__
-    7) __contains__
+    """This class provides unit tests for the following
+       read only methods of AbstactBST
+            1) __iter__
+            2) node_within_subtree
+            3) find_node
+            4) find_new_parent_node
+            5) in_order_successor
+            6) __non_zero__
+            7) __contains__
     """
 
     def setUp(self):
-
         self.tree = make_sample_tree()
 
-
-
     def test_non_zero_on_non_zero(self):
-        self.assertTrue(self.tree, "A non empty-tree should be True.")
-
-
+        self.assertTrue(
+            self.tree,
+            "A non empty-tree should be True.")
 
     def test_non_zero_on_zero(self):
-        self.assertFalse(ConcreteTestTree(None), "An empty tree should be False.")
-
+        self.assertFalse(
+            ConcreteTestTree(None),
+            "An empty tree should be False.")
 
     def test_iter(self):
-
-        expected_result = [12, 25, 28, 29, 30, 37, 40, 42, 45, 47, 50, 75, 100, 125, 130, 135, 137, 140, 150]
-
+        expected_result = [12, 25, 28, 29, 30, 37, 40, 42, 45, 47, \
+                           50, 75, 100, 125, 130, 135, 137, 140, 150]
         got_result = list(self.tree)
-        self.assertEqual(expected_result, got_result, "The iterator should return the nodes in inorder traversal order.")
-
-
+        self.assertEqual(
+            expected_result,
+            got_result,
+            "The iterator should return the nodes in inorder traversal order.")
 
     def test_node_within_subtree_on_none_lower_node(self):
-
         upper_key = 12
-
         links_before_lookup = self.tree.generate_link_description()
         result = self.tree.node_within_subtree(None, self.tree.find_node(upper_key))
-
         with self.subTest(lower_key=None, upper_key=upper_key):
-            self.assertTrue(result, "When lower_node is None, and upper_node is a TreeNode, True should always be returned.")
-
+            self.assertTrue(
+                result,
+                "When lower_node is None, and upper_node is a TreeNode"
+                ", True should always be returned.")
         with self.subTest(lower_key=None, upper_key=upper_key):
-            self.assertEqual(links_before_lookup, self.tree.generate_link_description(), "This method should not modify the tree or its structure.")
-
-
+            self.assertEqual(
+                links_before_lookup,
+                self.tree.generate_link_description(),
+                "This method should not modify the tree or its structure.")
 
     def test_node_within_subtree_on_none_upper_node(self):
-
         lower_key = 12
         links_before_lookup = self.tree.generate_link_description()
         result = self.tree.node_within_subtree(self.tree.find_node(lower_key), None)
-
         with self.subTest(lower_key=lower_key, upper_key=None):
-            self.assertFalse(result, "When lower_node is a TreeNode, and upper_node is None, False should always be returned.")
-
+            self.assertFalse(
+                result,
+                "When lower_node is a TreeNode, and upper_node is None,"
+                "False should always be returned.")
         with self.subTest(lower_key=lower_key, upper_key=None):
-            self.assertEqual(links_before_lookup, self.tree.generate_link_description(), "This method should not modify the tree or its structure.")
-
-
+            self.assertEqual(
+                links_before_lookup,
+                self.tree.generate_link_description(),
+                "This method should not modify the tree or its structure.")
 
     def test_node_within_subtree_both_args_none(self):
-
         links_before_lookup = self.tree.generate_link_description()
         result = self.tree.node_within_subtree(None, None)
-
         with self.subTest(lower_key=None, upper_key=None):
-            self.assertFalse(result, "When both args are None, False should always be returned.")
-
+            self.assertFalse(
+                result,
+                "When both args are None, False should always be returned.")
         with self.subTest(lower_key=None, upper_key=None):
-            self.assertEqual(links_before_lookup, self.tree.generate_link_description(), "This method should not modify the tree or its structure.")
-
-
+            self.assertEqual(
+                links_before_lookup,
+                self.tree.generate_link_description(),
+                "This method should not modify the tree or its structure.")
 
     def test_node_within_subtree_on_valid_input(self):
-
         test_cases = [
             (47, 45, True),     # Is right child.
             (42, 45, True),     # Is left child.
@@ -256,24 +260,28 @@ class TestAbstractBSTReadOnlyMethods(unittest.TestCase):
         ]
 
         for lower_key, upper_key, expected_result in test_cases:
-
             self.setUp()
-
             links_before_lookup = self.tree.generate_link_description()
-            got_result = self.tree.node_within_subtree(self.tree.find_node(lower_key), self.tree.find_node(upper_key))
-
+            got_result = self.tree.node_within_subtree(
+                self.tree.find_node(lower_key),
+                self.tree.find_node(upper_key))
             with self.subTest(lower_key=lower_key, upper_key=upper_key):
-                self.assertEqual(expected_result, got_result, "Expected {} but got {}".format(expected_result, got_result))
-
+                self.assertEqual(
+                    expected_result,
+                    got_result,
+                    "Expected {} but got {}".format(
+                        expected_result, got_result))
             with self.subTest(lower_key=lower_key, upper_key=upper_key):
-                self.assertEqual(links_before_lookup, self.tree.generate_link_description(), "This method should not modify the tree or its structure.")
-
+                self.assertEqual(
+                    links_before_lookup,
+                    self.tree.generate_link_description(),
+                    "This method should not modify the tree or its structure.")
 
     def test_contains_empty_tree(self):
         empty_tree = ConcreteTestTree(None)
-        self.assertFalse(12 in empty_tree, "An empty tree should return False on contains queries.")
-
-
+        self.assertFalse(
+            12 in empty_tree,
+            "An empty tree should return False on contains queries.")
 
     def test_find_new_parent_node_key_on_valid_input(self):
         # Each test case contains 2 intergers.
@@ -285,25 +293,26 @@ class TestAbstractBSTReadOnlyMethods(unittest.TestCase):
             (141, 140),     # Right of one-child node
             (134, 135),     # Left of one-child node
         ]
-
         for key, expected_parent_key in test_cases:
-
             self.setUp()
-
             links_before_lookup = self.tree.generate_link_description()
             got_parent = self.tree.find_new_parent_node(key)
-
             with self.subTest(key=key, expected_parent_key=expected_parent_key):
-                self.assertIsNotNone(got_parent, "expected {} but got None.".format(expected_parent_key))
-                self.assertEqual(expected_parent_key, got_parent.key, "expected {} but got {}".format(expected_parent_key, got_parent.key))
-
+                self.assertIsNotNone(
+                    got_parent,
+                    "expected {} but got None.".format(expected_parent_key))
+                self.assertEqual(
+                    expected_parent_key,
+                    got_parent.key,
+                    "expected {} but got {}".format(
+                        expected_parent_key, got_parent.key))
             with self.subTest(key=key):
-                self.assertEqual(links_before_lookup, self.tree.generate_link_description(), "This method should not modify the tree or its structure.")
-
-
+                self.assertEqual(
+                    links_before_lookup,
+                    self.tree.generate_link_description(),
+                    "This method should not modify the tree or its structure.")
 
     def test_find_new_parent_node_key_error(self):
-
         test_cases = [
             100,    # The root node.
             37,     # 2 children, right of parent.
@@ -312,28 +321,24 @@ class TestAbstractBSTReadOnlyMethods(unittest.TestCase):
             47,     # Leaf node, right of parent.
             40,     # 1 child, right of parent.
         ]
-
         for key in test_cases:
-
             self.setUp()
-
             with self.subTest(key=key):
                 with self.assertRaises(KeyError):
                     self.tree.find_new_parent_node(key)
-
             self.setUp()
-
             with self.subTest(key=key):
                 links_before_lookup = self.tree.generate_link_description()
                 try:
                     self.tree.find_new_parent_node(key)
                 except:
-                    self.assertEqual(links_before_lookup, self.tree.generate_link_description(), "This method should not modify the tree or its structure.")
-
-
+                    self.assertEqual(
+                        links_before_lookup,
+                        self.tree.generate_link_description(),
+                        "This method should not modify the tree or its"
+                        "structure.")
 
     def test_find_node_on_present_key(self):
-
         test_cases = [
             100,    # Root node.
             50,     # Left child of root.
@@ -346,41 +351,39 @@ class TestAbstractBSTReadOnlyMethods(unittest.TestCase):
             75,     # Shallow leaf node, is right child.
             12,     # Shallow leaf node, is left child.
         ]
-
         for key in test_cases:
-
             self.setUp()
-
             links_before_lookup = self.tree.generate_link_description()
             found_node = self.tree.find_node(key)
-
             with self.subTest(key=key):
-                self.assertIsNotNone(found_node, "expected {} but got None.".format(key))
-                self.assertEqual(key, found_node.key, "expected {} but got {}.".format(key, found_node.key))
-
+                self.assertIsNotNone(
+                    found_node,
+                    "expected {} but got None.".format(key))
+                self.assertEqual(
+                    key,
+                    found_node.key,
+                    "expected {} but got {}.".format(key, found_node.key))
             with self.subTest(key=key):
-                self.assertEqual(links_before_lookup, self.tree.generate_link_description(), "This method should not modify the tree or its structure.")
-
-
+                self.assertEqual(
+                    links_before_lookup,
+                    self.tree.generate_link_description(),
+                    "This method should not modify the tree or its structure.")
 
     def test_find_node_on_absent_key(self):
-
         test_cases = [101, -1, 51, 0] # Keys not in tree.
-
         for key in test_cases:
-
             self.setUp()
-
             links_before_lookup = self.tree.generate_link_description()
             found_node = self.tree.find_node(key)
-
             with self.subTest(key=key):
-                self.assertIsNone(found_node, "expected None but got {}".format(found_node))
-
+                self.assertIsNone(
+                    found_node,
+                    "expected None but got {}".format(found_node))
             with self.subTest(key=key):
-                self.assertEqual(links_before_lookup, self.tree.generate_link_description(), "This method should not modify the tree or its structure.")
-
-
+                self.assertEqual(
+                    links_before_lookup,
+                    self.tree.generate_link_description(),
+                    "This method should not modify the tree or its structure.")
 
     def test_contains_on_present_key(self):
         test_cases = [
@@ -396,46 +399,36 @@ class TestAbstractBSTReadOnlyMethods(unittest.TestCase):
             12,     # Shallow leaf node, is left child.
         ]
         for key in test_cases:
-
             self.setUp()
-
             links_before_lookup = self.tree.generate_link_description()
             result = key in self.tree
-
             with self.subTest(key=key):
                 self.assertTrue(result, "Expected True but got False.")
-
             with self.subTest(key=key):
-                self.assertEqual(links_before_lookup, self.tree.generate_link_description(), "This method should not modify the tree or its structure.")
-
-
-
+                self.assertEqual(
+                    links_before_lookup,
+                    self.tree.generate_link_description(),
+                    "This method should not modify the tree or its structure.")
 
     def test_contains_on_absent_key(self):
         test_cases = [101, -1, 51, 0] # Keys not in tree.
         for key in test_cases:
-
             links_before_lookup = self.tree.generate_link_description()
             result = key in self.tree
-
             with self.subTest(key=key):
                 self.assertFalse(result, "expected False but got True.")
-
             with self.subTest(key=key):
-                self.assertEqual(links_before_lookup, self.tree.generate_link_description(), "This method should not modify the tree or its structure.")
-
-
+                self.assertEqual(
+                    links_before_lookup,
+                    self.tree.generate_link_description(),
+                    "This method should not modify the tree or its structure.")
 
     def test_find_new_parent_node_on_empty_tree(self):
-
         tree = ConcreteTestTree(None)
         parent_node = tree.find_new_parent_node(1)
-        self.assertIsNone(parent_node, "None should be returned when the tree is empty.")
-
-
-
-
-
+        self.assertIsNone(
+            parent_node,
+            "None should be returned when the tree is empty.")
 
     def test_in_order_successor_on_valid_inputs(self):
         # Test cases are of the form (key, inorder_successor(key).key)
@@ -446,34 +439,34 @@ class TestAbstractBSTReadOnlyMethods(unittest.TestCase):
             (50, 75),       # Inorder successor is right child.
             (25, 28),       # Inorder successor is in right subtree.
         ]
-
-        for key, expected_inorder_successor_key in test_cases:
-
+        for key, expected_key in test_cases:
             self.setUp()
             links_before_lookup = self.tree.generate_link_description()
             got_key = self.tree.in_order_successor(self.tree.find_node(key)).key
-
-            with self.subTest(key_of_node=key, expected_inorder_successor_key=expected_inorder_successor_key):
-                self.assertEqual(expected_inorder_successor_key, got_key, "expected {}, but got {}.".format(expected_inorder_successor_key, got_key))
-
+            with self.subTest(key_of_node=key, expected_key=expected_key):
+                self.assertEqual(
+                    expected_key,
+                    got_key,
+                    "expected {}, but got {}.".format(expected_key, got_key))
             with self.subTest(key_of_node=key):
-                self.assertEqual(links_before_lookup, self.tree.generate_link_description(), "This method should not modify the tree or its structure.")
-
-
+                self.assertEqual(
+                    links_before_lookup,
+                    self.tree.generate_link_description(),
+                    "This method should not modify the tree or its structure.")
 
     def test_in_order_successor_on_tree_maximum(self):
-        self.assertIsNone(self.tree.in_order_successor(self.tree.find_node(150)), "The in-order successor of the tree maximum should be None.")
-
-
+        self.assertIsNone(
+            self.tree.in_order_successor(self.tree.find_node(150)),
+            "The in-order successor of the tree maximum should be None.")
 
     def test_in_order_successor_on_singleton_tree(self):
         singleton_tree = ConcreteTestTree(None)
         singleton_tree.root = AbstractBST.TreeNode(1)
-        self.assertIsNone(singleton_tree.in_order_successor(singleton_tree.root), "The in-order successor of the tree maximum should be None.")
+        self.assertIsNone(
+            singleton_tree.in_order_successor(singleton_tree.root),
+            "The in-order successor of the tree maximum should be None.")
 
-
-
-    def test_inorder_successor_raises_type_error_on_None_key(self):
+    def test_inorder_successor_raises_type_error_on_none_key(self):
         with self.assertRaises(TypeError):
             self.tree.in_order_successor(None)
 
@@ -490,7 +483,6 @@ class TestAbstractBSTSubtreeReplacementMethods(unittest.TestCase):
 
     def setUp(self):
         self.tree = make_sample_tree()
-
 
     def test_replace_node(self):
         test_cases = [
@@ -513,31 +505,37 @@ class TestAbstractBSTSubtreeReplacementMethods(unittest.TestCase):
         ]
 
         for old_key, new_key, expected_changes in test_cases:
-
             self.setUp()
-
             old_node = self.tree.find_node(old_key)
             new_node = AbstractBST.TreeNode(new_key)
-
             snapshot_before = BinaryTreeSnapshot({self.tree.root})
             self.tree.replace_node(old_node, new_node)
             snapshot_after = BinaryTreeSnapshot({self.tree.root})
             missing_relations, got_changes = snapshot_before.difference(snapshot_after, ignore_overwrites=True)
-
             # Filter out any missing relations where old_key is the first node referenced.
             # This is because we expect these facts to have disappeared.
             missing_relations = [relation for relation in missing_relations if relation[1] != old_key]
-
             with self.subTest(old_key=old_key, new_key=new_key, expected_changes=expected_changes):
-                self.assertFalse(missing_relations, "These tree links should still be present in the tree.")
-                self.assertEqual(set(expected_changes), set(got_changes), "Some tree links did not change as expected.")
-
+                self.assertFalse(
+                    missing_relations,
+                    "These tree links should still be present in the tree.")
+                self.assertEqual(
+                    set(expected_changes),
+                    set(got_changes),
+                    "Some tree links did not change as expected.")
             with self.subTest(old_key=old_key, new_key=new_key):
                 if old_key == 100:
-                    self.assertEqual(self.tree.root.key, new_key, "When the root is substituited, the root should now have new_key.")
+                    self.assertEqual(
+                        self.tree.root.key,
+                        new_key,
+                        "When the root is substituited, the root should "
+                        "now have new_key.")
                 else:
-                    self.assertEqual(self.tree.root.key, 100, "When a node other than the root is substituited, the root key should not change.")
-
+                    self.assertEqual(
+                        self.tree.root.key,
+                        100,
+                        "When a node other than the root is substituited, "
+                        "the root key should not change.")
 
     def test_replace_node_type_error(self):
 
@@ -589,8 +587,13 @@ class TestAbstractBSTSubtreeReplacementMethods(unittest.TestCase):
                 self.tree.replace_subtree(node_to_replace, node_to_move)
                 snapshot_after = BinaryTreeSnapshot({self.tree.root, node_to_move, node_to_replace})
                 missing_relations, got_changes = snapshot_before.difference(snapshot_after, ignore_overwrites=True)
-                self.assertFalse(missing_relations, "These tree links should still be present in the tree.")
-                self.assertEqual(set(expected_changes), set(got_changes), "Some tree links did not change as expected.")
+                self.assertFalse(
+                    missing_relations,
+                    "These tree links should still be present in the tree.")
+                self.assertEqual(
+                    set(expected_changes),
+                    set(got_changes),
+                    "Some tree links did not change as expected.")
 
 
 
@@ -610,11 +613,11 @@ class TestAbstractBSTSubtreeReplacementMethods(unittest.TestCase):
         old_subtree = self.tree.find_node(100) # The root.
         new_subtree = self.tree.find_node(50)
         self.tree.replace_subtree(old_subtree, new_subtree)
-        self.assertEqual(self.tree.root.key, 50, "self.root should update when the root node is changed.")
-
+        self.assertTrue(
+            self.tree.root.key == 50,
+            "self.root should update when the root node is changed.")
 
     def test_replace_left_subtree(self):
-
         test_cases = [
             # Replace the root's left subtree with None.
             [100, None, [('parent', 50, None), ('left', 100, None)]],
@@ -633,40 +636,36 @@ class TestAbstractBSTSubtreeReplacementMethods(unittest.TestCase):
         ]
 
         for parent_key, to_move_key, expected_changes in test_cases:
-
             self.setUp()
-
             parent = self.tree.find_node(parent_key)
             node_to_replace = parent.left
             if to_move_key is None:
                 node_to_move = None
             else:
                 node_to_move = self.tree.find_node(to_move_key)
-
             snapshot_before = BinaryTreeSnapshot({self.tree.root, node_to_move, node_to_replace})
             self.tree.replace_left_subtree(parent, node_to_move)
             snapshot_after = BinaryTreeSnapshot({self.tree.root, node_to_move, node_to_replace})
-
             with self.subTest(parent_key=parent_key, to_move_key=to_move_key, expected_changes=expected_changes):
-
                 missing_relations, got_changes = snapshot_before.difference(snapshot_after, ignore_overwrites=True)
-                self.assertFalse(missing_relations, "These tree links should still be present in the tree.")
-                self.assertEqual(set(expected_changes), set(got_changes), "Some tree links did not change as expected.")
-
+                self.assertFalse(
+                    missing_relations,
+                    "These tree links should still be present in the tree.")
+                self.assertEqual(
+                    set(expected_changes),
+                    set(got_changes),
+                    "Some tree links did not change as expected.")
             with self.subTest(parent_key=parent_key, to_move_key=to_move_key, expected_changes=expected_changes):
-                self.assertEqual(self.tree.root.key, 100, "replace_left_subtree should not change the root node.")
-
-
+                self.assertTrue(
+                    self.tree.root.key == 100,
+                    "replace_left_subtree should not change the root node.")
 
     def test_replace_left_subtree_raises_type_error(self):
         with self.assertRaises(TypeError, msg="replace_subtree should raise a TypeError if parent is None."):
             new_subtree_node = self.tree.find_node(12)
             self.tree.replace_left_subtree(None, new_subtree_node)
 
-
-
     def test_replace_right_subtree(self):
-
         test_cases = [
             # Replace the root's right subtree with None.
             [100, None, [('parent', 150, None), ('right', 100, None)]],
@@ -702,11 +701,18 @@ class TestAbstractBSTSubtreeReplacementMethods(unittest.TestCase):
             with self.subTest(parent_key=parent_key, to_move_key=to_move_key, expected_changes=expected_changes):
 
                 missing_relations, got_changes = snapshot_before.difference(snapshot_after, ignore_overwrites=True)
-                self.assertFalse(missing_relations, "These tree links should still be present in the tree.")
-                self.assertEqual(set(expected_changes), set(got_changes), "Some tree links did not change as expected.")
+                self.assertFalse(
+                    missing_relations,
+                    "These tree links should still be present in the tree.")
+                self.assertEqual(
+                    set(expected_changes),
+                    set(got_changes),
+                    "Some tree links did not change as expected.")
 
             with self.subTest(parent_key=parent_key, to_move_key=to_move_key, expected_changes=expected_changes):
-                self.assertEqual(self.tree.root.key, 100, "replace_right_subtree should not change the root node.")
+                self.assertTrue(
+                    self.tree.root.key == 100,
+                    "replace_right_subtree should not change the root node.")
 
 
 
@@ -714,7 +720,6 @@ class TestAbstractBSTSubtreeReplacementMethods(unittest.TestCase):
         with self.assertRaises(TypeError, msg="replace_subtree should raise a TypeError if parent is None."):
             new_subtree_node = self.tree.find_node(12)
             self.tree.replace_right_subtree(None, new_subtree_node)
-
 
 class TestAbstractBSTRotateMethods(unittest.TestCase):
 
@@ -727,10 +732,7 @@ class TestAbstractBSTRotateMethods(unittest.TestCase):
     def setUp(self):
         self.tree = make_sample_tree()
 
-
-
     def test_rotate_left(self):
-
         test_cases = [
             # The root node
             [100, [("parent", 150, None), ("parent", 100, 150), ("left", 150, 100), ("right", 100, 125), ("parent", 125, 100)]],
@@ -743,48 +745,44 @@ class TestAbstractBSTRotateMethods(unittest.TestCase):
             # Has 1 child, right of its parent, node.right.left exists.
             [130, [("right", 125, 140), ("parent", 140, 125), ("left", 140, 130), ("parent", 130, 140), ("right", 130, 135), ("parent", 135, 130)]],
         ]
-
         for key, expected_changes in test_cases:
-
             is_root = key == 100
             self.setUp() # Must reset the tree each time.
-
             snapshot_before = BinaryTreeSnapshot({self.tree.root})
             self.tree.rotate_left(self.tree.find_node(key))
             snapshot_after = BinaryTreeSnapshot({self.tree.root})
             missing_relations, got_changes = snapshot_before.difference(snapshot_after, ignore_overwrites=True)
-
             with self.subTest(key=key, expected_changes=expected_changes):
-                self.assertFalse(missing_relations, "These tree links should still be present in the tree.")
-                self.assertEqual(set(expected_changes), set(got_changes), "Some tree links did not change as expected.")
-
+                self.assertFalse(
+                    missing_relations,
+                    "These tree links should still be present in the tree.")
+                self.assertEqual(
+                    set(expected_changes),
+                    set(got_changes),
+                    "Some tree links did not change as expected.")
             with self.subTest(key=key, is_root=is_root):
                 if is_root:
-                    self.assertEqual(self.tree.root.key, 150, "When the root is rotated left, the new root should be the old root's right child.")
+                    self.assertTrue(
+                        self.tree.root.key == 150,
+                        "When the root is rotated left, the new root "
+                        "should be the old root's right child.")
                 else:
-                    self.assertEqual(self.tree.root.key, 100, "When a node other than the root is rotated, the root should not change.")
-
-
+                    self.assertTrue(
+                        self.tree.root.key == 100,
+                        "When a node other than the root is rotated, "
+                        "the root should not change.")
 
     def test_rotate_left_type_error(self):
-
         with self.assertRaises(TypeError, msg="rotate_left should raise a TypeError if arg is None."):
             self.tree.rotate_left(None)
 
-
-
     def test_rotate_left_value_error(self):
-
         with self.assertRaises(ValueError, msg="rotate_left should raise a ValueError if the given node has no right child."):
             self.tree.rotate_left(self.tree.find_node(75)) # Has no children
-
         with self.assertRaises(ValueError, msg="rotate_left should raise a ValueError if the given node has no right child."):
             self.tree.rotate_left(self.tree.find_node(140)) # Has left child only
 
-
-
     def test_rotate_right(self):
-
         test_cases = [
             # The root node
             [100, [("parent", 50, None), ("parent", 100, 50), ("parent", 75, 100), ("right", 50, 100), ("left", 100, 75)]],
@@ -808,14 +806,25 @@ class TestAbstractBSTRotateMethods(unittest.TestCase):
             missing_relations, got_changes = snapshot_before.difference(snapshot_after, ignore_overwrites=True)
 
             with self.subTest(key=key, expected_changes=expected_changes):
-                self.assertFalse(missing_relations, "These tree links should still be present in the tree.")
-                self.assertEqual(set(expected_changes), set(got_changes), "Some tree links did not change as expected.")
+                self.assertFalse(
+                    missing_relations,
+                    "These tree links should still be present in the tree.")
+                self.assertEqual(
+                    set(expected_changes),
+                    set(got_changes),
+                    "Some tree links did not change as expected.")
 
             with self.subTest(key=key, is_root=is_root):
                 if is_root:
-                    self.assertEqual(self.tree.root.key, 50, "When the root is rotated right, the new root should be the old root's left child.")
+                    self.assertTrue(
+                        self.tree.root.key == 50,
+                        "When the root is rotated right, the new root "
+                        "should be the old root's left child.")
                 else:
-                    self.assertEqual(self.tree.root.key, 100, "When a node other than the root is rotated, the root should not change.")
+                    self.assertTrue(
+                        self.tree.root.key == 100,
+                        "When a node other than the root is rotated, "
+                        "the root should not change.")
 
 
 
@@ -843,22 +852,28 @@ class TestRedBlackTree(unittest.TestCase):
         keys = [1, 2, 3, 4, 5, 20, 15, 14, 13, 12, 11, 6, 7, 8, 9, 19, 18, 25, 23, 24, 22, 21, 64, 66, 67, 69, 37, 39, 70, 73, 40, 75, 42, 76, 46, 47, 49, 53, 58, 62]
         for key in keys:
             tree.add(key)
-            self.assertTrue(key in tree, "Key {} should be in the tree".format(key))
+            self.assertTrue(
+                key in tree,
+                "Key {} should be in the tree".format(key))
 
 
     def test_remove(self):
         tree = RedBlackTree()
         keys = [1, 2, 3, 4, 5, 20, 15, 14, 13, 12, 11, 6, 7, 8, 9, 19, 18, 25, 23, 24, 22, 21, 64, 66, 67, 69, 37, 39, 70, 73, 40, 75, 42, 76, 46, 47, 49, 53, 58, 62]
-        for key in keys: tree.add(key)
+        for key in keys:
+            tree.add(key)
         for key in keys:
             tree.remove(key)
-            self.assertFalse(key in tree, "Key {} should no longer be in the tree.".format(key))
+            self.assertFalse(
+                key in tree,
+                "Key {} should no longer be in the tree.".format(key))
 
 
     def test_remove_on_not_present(self):
         tree = RedBlackTree()
         keys = [1, 2, 3, 4, 5, 20, 15, 14, 13, 12, 11, 6, 7, 8, 9, 19, 18, 25, 23, 24, 22, 21, 64, 66, 67, 69, 37, 39, 70, 73, 40, 75, 42, 76, 46, 47, 49, 53, 58, 62]
-        for key in keys: tree.add(key)
+        for key in keys:
+            tree.add(key)
         non_existant_keys = [10, 0, 16, 17, 28]
         for key in non_existant_keys:
             with self.assertRaises(KeyError, msg="Remove should raise a key error if the node is not present in the tree,"):
@@ -872,16 +887,24 @@ class TestRedBlackTree(unittest.TestCase):
         for key in keys:
             tree.add(key)
             expected_length += 1
-            self.assertEqual(len(tree), expected_length, "The tree should be length {}, but got length {}.".format(expected_length, len(tree)))
+            self.assertEqual(
+                len(tree),
+                expected_length,
+                "The tree should be length {}, but got length {}.".format(expected_length, len(tree)))
         for key in keys:
             tree.remove(key)
             expected_length -= 1
-            self.assertEqual(len(tree), expected_length, "The tree should be length {}, but got length {}.".format(expected_length, len(tree)))
+            self.assertEqual(
+                len(tree),
+                expected_length,
+                "The tree should be length {}, but got length {}.".format(expected_length, len(tree)))
 
 
     def test_length_on_empty_tree(self):
         tree = RedBlackTree()
-        self.assertEqual(len(tree), 0, "An empty tree should have a length of 0.")
+        self.assertTrue(
+            len(tree) == 0,
+            "An empty tree should have a length of 0.")
 
 
     def test_length_on_duplicates(self):
@@ -892,7 +915,10 @@ class TestRedBlackTree(unittest.TestCase):
         for key in keys:
             tree.add(key)
             keys_in_tree.add(key)
-            self.assertEqual(len(tree), len(keys_in_tree), "The tree should be length {}, but got length {}.".format(len(keys_in_tree), len(tree)))
+            self.assertEqual(
+                len(tree),
+                len(keys_in_tree),
+                "The tree should be length {}, but got length {}.".format(len(keys_in_tree), len(tree)))
         for key in keys:
             try:
                 tree.remove(key)
@@ -900,21 +926,30 @@ class TestRedBlackTree(unittest.TestCase):
                 pass
             if key in keys_in_tree:
                 keys_in_tree.remove(key)
-            self.assertEqual(len(tree), len(keys_in_tree), "The tree should be length {}, but got length {}.".format(len(keys_in_tree), len(tree)))
+            self.assertEqual(
+                len(tree),
+                len(keys_in_tree),
+                "The tree should be length {}, but got length {}.".format(len(keys_in_tree), len(tree)))
 
 
     def test_is_valid_red_black_tree_1(self):
         keys = [5, 3, 2, 1, 4, 1, 2, 6, 7, 1, 5, 4, 3, 2, 1]
         tree = RedBlackTree()
-        for key in keys: tree.add(key)
-        self.assertTrue(tree.is_red_black_tree(), "The Red Black Tree properties were violated.")
+        for key in keys:
+            tree.add(key)
+        self.assertTrue(
+            tree.is_red_black_tree(),
+            "The Red Black Tree properties were violated.")
 
 
     def test_is_valid_red_black_tree_2(self):
         keys = [1, 2, 3, 4, 5, 20, 15, 14, 13, 12, 11, 6, 7, 8, 9, 19, 18, 25, 23, 24, 22, 21, 64, 66, 67, 69, 37, 39, 70, 73, 40, 75, 42, 76, 46, 47, 49, 53, 58, 62]
         tree = RedBlackTree()
-        for key in keys: tree.add(key)
-        self.assertTrue(tree.is_red_black_tree(), "The Red Black Tree properties were violated.")
+        for key in keys:
+            tree.add(key)
+        self.assertTrue(
+            tree.is_red_black_tree(),
+            "The Red Black Tree properties were violated.")
 
 
     # A red black tree should never have a depth more than 2 times the base-2 log of the number of nodes.
@@ -929,7 +964,9 @@ class TestRedBlackTree(unittest.TestCase):
                 depth = tree.max_depth()
                 lower_bound = log(length, 2)
                 upper_bound = (2 * lower_bound) + 1
-                self.assertTrue(lower_bound <= depth <= upper_bound, "The tree depth should be between {} and {}, but it is {}.".format(lower_bound, upper_bound, depth))
+                self.assertTrue(
+                    lower_bound <= depth <= upper_bound,
+                    "The tree depth should be between {} and {}, but it is {}.".format(lower_bound, upper_bound, depth))
 
 
 
